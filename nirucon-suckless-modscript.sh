@@ -95,6 +95,7 @@ change_font_size() {
                 ;;
         esac
         cp "$config_file" "$(dirname "$config_file")/config.h"
+        echo "Running sudo make clean install in $(dirname "$config_file")"
         sudo make -C "$(dirname "$config_file")" clean install
         echo "Font size changed to $new_font_size. You may need to restart your $mod_choice."
     fi
@@ -172,6 +173,7 @@ change_font() {
     esac
 
     cp "$config_file" "$(dirname "$config_file")/config.h"
+    echo "Running sudo make clean install in $(dirname "$config_file")"
     sudo make -C "$(dirname "$config_file")" clean install
     echo "Font changed to $new_font_string. You may need to restart your $mod_choice."
 }
