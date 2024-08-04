@@ -4,6 +4,7 @@
 # Minimal script with a few functions, might evolve in the future...
 # Made by and for myself, Nicklas Rudolfsson https://github.com/nirucon
 
+clear
 echo "Welcome to nirucon-suckless-modscript v0.1"
 echo "Minimal script with a few functions, might evolve in the future..."
 echo "Made by and for myself, Nicklas Rudolfsson https://github.com/nirucon"
