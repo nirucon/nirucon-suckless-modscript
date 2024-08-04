@@ -102,7 +102,12 @@ change_font_size() {
 
 # Function to search for available fonts
 search_fonts() {
-    find /usr/share/fonts /usr/local/share/fonts ~/.local/share/fonts -type f \( -name "*.ttf" -o -name "*.otf" \) -exec basename {} \; | sort -u
+    local font_dirs=()
+    [ -d /usr/share/fonts ] && font_dirs+=("/usr/share/fonts")
+    [ -d /usr/local/share/fonts ] && font_dirs+=("/usr/local/share/fonts")
+    [ -d ~/.local/share/fonts ] && font_dirs+=("$HOME/.local/share/fonts")
+    
+    find "${font_dirs[@]}" -type f \( -name "*.ttf" -o -name "*.otf" \) -exec basename {} \; | sort -u
 }
 
 # Function to filter fonts based on user input
