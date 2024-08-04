@@ -105,24 +105,53 @@ search_fonts() {
     find /usr/share/fonts /usr/local/share/fonts ~/.local/share/fonts -type f \( -name "*.ttf" -o -name "*.otf" \) -exec basename {} \; | sort -u
 }
 
-# Function to autosuggest font names
-autocomplete() {
-    local cur="${COMP_WORDS[COMP_CWORD]}"
-    COMPREPLY=( $(compgen -W "$1" -- "$cur") )
+# Function to filter fonts based on user input
+filter_fonts() {
+    local input=$1
+    local fonts=("$@")
+    local filtered_fonts=()
+    for font in "${fonts[@]:1}"; do
+        if [[ "$font" == *"$input"* ]]; then
+            filtered_fonts+=("$font")
+        fi
+    done
+    echo "${filtered_fonts[@]}"
 }
 
 # Function to change the font
 change_font() {
     local config_file=$1
-    local available_fonts=$(search_fonts)
-    
-    echo "Start typing the font name and press Enter:"
-    read -e -p "Font name: " -i "" font_name
-    COMPREPLY=()
-    complete -W "$available_fonts" -F autocomplete font_name
+    local available_fonts=($(search_fonts))
+    local filtered_fonts=()
+
+    while true; do
+        read -p "Start typing the font name and press Enter: " font_input
+        filtered_fonts=($(filter_fonts "$font_input" "${available_fonts[@]}"))
+
+        if [ ${#filtered_fonts[@]} -eq 0 ]; then
+            echo "No matching fonts found. Please try again."
+        else
+            break
+        fi
+    done
+
+    echo "Matching fonts:"
+    for i in "${!filtered_fonts[@]}"; do
+        printf "%3d) %s\n" $((i + 1)) "${filtered_fonts[$i]}"
+    done
+
+    while true; do
+        read -p "Enter the number of the font you want to use: " font_choice
+        if [[ "$font_choice" =~ ^[0-9]+$ ]] && ((font_choice > 0 && font_choice <= ${#filtered_fonts[@]})); then
+            new_font_name="${filtered_fonts[$((font_choice - 1))]}"
+            break
+        else
+            echo "Invalid choice. Please try again."
+        fi
+    done
 
     read -p "Input new font size (only numbers) and press enter: " new_font_size
-    new_font_string="$font_name:size=$new_font_size:antialias=true:autohint=true"
+    new_font_string="$new_font_name:size=$new_font_size:antialias=true:autohint=true"
 
     case $mod_choice in
         dwm)
