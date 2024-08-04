@@ -105,28 +105,24 @@ search_fonts() {
     find /usr/share/fonts /usr/local/share/fonts ~/.local/share/fonts -type f \( -name "*.ttf" -o -name "*.otf" \) -exec basename {} \; | sort -u
 }
 
+# Function to autosuggest font names
+autocomplete() {
+    local cur="${COMP_WORDS[COMP_CWORD]}"
+    COMPREPLY=( $(compgen -W "$1" -- "$cur") )
+}
+
 # Function to change the font
 change_font() {
     local config_file=$1
-    local available_fonts=($(search_fonts))
-
-    echo "Available fonts:"
-    for i in "${!available_fonts[@]}"; do
-        printf "%3d) %s\n" $((i + 1)) "${available_fonts[$i]}"
-    done
-
-    while true; do
-        read -p "Enter the number of the font you want to use: " font_choice
-        if [[ "$font_choice" =~ ^[0-9]+$ ]] && ((font_choice > 0 && font_choice <= ${#available_fonts[@]})); then
-            new_font_name="${available_fonts[$((font_choice - 1))]}"
-            break
-        else
-            echo "Invalid choice. Please try again."
-        fi
-    done
+    local available_fonts=$(search_fonts)
+    
+    echo "Start typing the font name and press Enter:"
+    read -e -p "Font name: " -i "" font_name
+    COMPREPLY=()
+    complete -W "$available_fonts" -F autocomplete font_name
 
     read -p "Input new font size (only numbers) and press enter: " new_font_size
-    new_font_string="$new_font_name:size=$new_font_size:antialias=true:autohint=true"
+    new_font_string="$font_name:size=$new_font_size:antialias=true:autohint=true"
 
     case $mod_choice in
         dwm)
