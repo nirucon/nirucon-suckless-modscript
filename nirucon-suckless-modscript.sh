@@ -10,6 +10,7 @@ echo "Made by and for myself, Nicklas Rudolfsson https://github.com/nirucon"
 echo ""
 echo "Functional features:"
 echo "- Change font size in dwm, st, dmenu"
+echo "- Change font in dwm, st, dmenu"
 echo "- More might be added :)"
 echo ""
 
@@ -99,6 +100,52 @@ change_font_size() {
     fi
 }
 
+# Function to search for available fonts
+search_fonts() {
+    find /usr/share/fonts /usr/local/share/fonts ~/.local/share/fonts -type f \( -name "*.ttf" -o -name "*.otf" \) -exec basename {} \; | sort -u
+}
+
+# Function to change the font
+change_font() {
+    local config_file=$1
+    local available_fonts=($(search_fonts))
+
+    echo "Available fonts:"
+    for i in "${!available_fonts[@]}"; do
+        printf "%3d) %s\n" $((i + 1)) "${available_fonts[$i]}"
+    done
+
+    while true; do
+        read -p "Enter the number of the font you want to use: " font_choice
+        if [[ "$font_choice" =~ ^[0-9]+$ ]] && ((font_choice > 0 && font_choice <= ${#available_fonts[@]})); then
+            new_font_name="${available_fonts[$((font_choice - 1))]}"
+            break
+        else
+            echo "Invalid choice. Please try again."
+        fi
+    done
+
+    read -p "Input new font size (only numbers) and press enter: " new_font_size
+    new_font_string="$new_font_name:size=$new_font_size:antialias=true:autohint=true"
+
+    case $mod_choice in
+        dwm)
+            sed -i "s|static const char \*fonts\[\] = \{ \".*\"|static const char \*fonts\[\] = \{ \"$new_font_string\"|" "$config_file"
+            sed -i "s|static const char dmenufont\[\] = \".*\"|static const char dmenufont\[\] = \"$new_font_string\"|" "$config_file"
+            ;;
+        st)
+            sed -i "s|static char \*font = \".*\"|static char \*font = \"$new_font_string\"|" "$config_file"
+            ;;
+        dmenu)
+            sed -i "s|static const char \*fonts\[\] = \{ \".*\"|static const char \*fonts\[\] = \{ \"$new_font_string\"|" "$config_file"
+            ;;
+    esac
+
+    cp "$config_file" "$(dirname "$config_file")/config.h"
+    sudo make -C "$(dirname "$config_file")" clean install
+    echo "Font changed to $new_font_string. You may need to restart your $mod_choice."
+}
+
 # Determine config.def.h path based on choice
 case $mod_choice in
     dwm)
@@ -126,7 +173,21 @@ echo "Font"
 echo "Current font is: $font_name"
 echo "Current font size is: $font_size"
 
-change_font_size "$config_file"
+# Prompt user to change font or font size
+while true; do
+    read -p "Do you want to change the font or the font size? (font/size): " change_choice
+    change_choice=$(echo "$change_choice" | tr '[:upper:]' '[:lower:]')
+    
+    if [[ "$change_choice" == "font" ]]; then
+        change_font "$config_file"
+        break
+    elif [[ "$change_choice" == "size" ]]; then
+        change_font_size "$config_file"
+        break
+    else
+        echo "Error: Please choose 'font' or 'size'."
+    fi
+done
 
 # Ask to run the script again or quit
 while true; do
