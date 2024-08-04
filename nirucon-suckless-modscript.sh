@@ -60,16 +60,16 @@ get_font_info() {
     local config_file=$1
     case $mod_choice in
         dwm)
-            font_name=$(grep -Eo 'static const char \*fonts\[\] = \{ "[^:]+:size=[0-9]+' "$config_file" | sed 's/static const char \*fonts\[\] = \{ "//')
-            font_size=$(echo "$font_name" | grep -Eo '[0-9]+')
+            font_name=$(grep -Eo 'static const char \*fonts\[\] = \{ "[^:]+:size=[0-9]+' "$config_file" | sed -E 's/static const char \*fonts\[\] = \{ "([^:]+):size=[0-9]+/\1/')
+            font_size=$(echo "$font_name" | grep -Eo '[0-9]+$')
             ;;
         st)
-            font_name=$(grep -Eo 'static char \*font = "[^:]+:size=[0-9]+' "$config_file" | sed 's/static char \*font = "//')
-            font_size=$(echo "$font_name" | grep -Eo '[0-9]+')
+            font_name=$(grep -Eo 'static char \*font = "[^:]+:size=[0-9]+' "$config_file" | sed -E 's/static char \*font = "([^:]+):size=[0-9]+/\1/')
+            font_size=$(echo "$font_name" | grep -Eo '[0-9]+$')
             ;;
         dmenu)
-            font_name=$(grep -Eo 'static const char \*fonts\[\] = \{ "[^:]+:size=[0-9]+' "$config_file" | sed 's/static const char \*fonts\[\] = \{ "//')
-            font_size=$(echo "$font_name" | grep -Eo '[0-9]+')
+            font_name=$(grep -Eo 'static const char \*fonts\[\] = \{ "[^:]+:size=[0-9]+' "$config_file" | sed -E 's/static const char \*fonts\[\] = \{ "([^:]+):size=[0-9]+/\1/')
+            font_size=$(echo "$font_name" | grep -Eo '[0-9]+$')
             ;;
     esac
 }
@@ -85,13 +85,13 @@ change_font_size() {
         new_font_name=$(echo "$font_name" | sed "s/[0-9]\+/$new_font_size/")
         case $mod_choice in
             dwm)
-                sed -i "s|$font_name|$new_font_name|" "$config_file"
+                sed -i "s|$font_name:size=[0-9]\+|$font_name:size=$new_font_size|" "$config_file"
                 ;;
             st)
-                sed -i "s|$font_name|$new_font_name|" "$config_file"
+                sed -i "s|$font_name:size=[0-9]\+|$font_name:size=$new_font_size|" "$config_file"
                 ;;
             dmenu)
-                sed -i "s|$font_name|$new_font_name|" "$config_file"
+                sed -i "s|$font_name:size=[0-9]\+|$font_name:size=$new_font_size|" "$config_file"
                 ;;
         esac
         cp "$config_file" "$(dirname "$config_file")/config.h"
@@ -202,7 +202,7 @@ get_font_info "$config_file"
 # Display current font info and prompt for changes
 echo "$mod_choice"
 echo "Font"
-echo "Current font is: $font_name"
+echo "Current font is: ${font_name%:*}"
 echo "Current font size is: $font_size"
 
 # Prompt user to change font or font size
