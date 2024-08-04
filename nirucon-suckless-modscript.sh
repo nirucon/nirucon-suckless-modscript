@@ -54,7 +54,7 @@ echo ""
 
 # Ask for path-to-suckless directory
 while true; do
-    read -p "Enter your path to suckless main dir (default: ~/.config/suckless), just press enter for default: " suckless_dir
+    read -p "Enter your path to suckless main dir and press enter or just press enter for default (~/.config/suckless): " suckless_dir
     suckless_dir=${suckless_dir:-~/.config/suckless}
 
     if [ -d "$suckless_dir" ]; then
