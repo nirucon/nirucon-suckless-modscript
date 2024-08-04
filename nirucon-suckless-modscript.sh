@@ -54,7 +54,7 @@ echo ""
 
 # Ask for path-to-suckless directory
 while true; do
-    read -p "Enter your path to suckless main dir (default: ~/.config/suckless): " suckless_dir
+    read -p "Enter your path to suckless main dir (default: ~/.config/suckless), just press enter for default: " suckless_dir
     suckless_dir=${suckless_dir:-~/.config/suckless}
 
     if [ -d "$suckless_dir" ]; then
@@ -101,7 +101,7 @@ get_font_info() {
 # Function to change font size in config.def.h
 change_font_size() {
     local config_file=$1
-    read -p "Input new font size (only numbers) and press enter to keep current size ($font_size): " new_font_size
+    read -p "Input new font size (only numbers like: 10) and press enter, or press enter to keep current size ($font_size): " new_font_size
     new_font_size=${new_font_size:-$font_size}
     new_font_name="$font_name:size=$new_font_size"
     case $mod_choice in
@@ -121,18 +121,26 @@ change_font_size() {
     echo -e "Font size changed to ${GREEN}$new_font_size${NC}. You may need to restart your $mod_choice."
 }
 
-# Function to search for available fonts using fc-list
+# New function to search for available fonts and list them without file extensions or trailing characters
 search_fonts() {
-    fc-list : family | sed 's/,.*//g' | sort -u
+    local font_dirs=()
+    [ -d /usr/share/fonts ] && font_dirs+=("/usr/share/fonts")
+    [ -d /usr/local/share/fonts ] && font_dirs+=("/usr/local/share/fonts")
+    [ -d ~/.local/share/fonts ] && font_dirs+=("$HOME/.local/share/fonts")
+
+    find "${font_dirs[@]}" -type f \( -name "*.ttf" -o -name "*.otf" \) -print | while read -r font_file; do
+        base_name=$(basename "$font_file" | sed 's/\.[ot]tf$//')
+        echo "$base_name"
+    done | sort -u
 }
 
-# Function to filter fonts based on user input
+# Function to filter fonts based on user input (case-insensitive)
 filter_fonts() {
-    local input=$1
-    local fonts=("$@")
+    local input=$(echo "$1" | tr '[:upper:]' '[:lower:]')
+    local fonts=("${@:2}")
     local filtered_fonts=()
-    for font in "${fonts[@]:1}"; do
-        if [[ "$font" == *"$input"* ]]; then
+    for font in "${fonts[@]}"; do
+        if [[ "$(echo "$font" | tr '[:upper:]' '[:lower:]')" =~ $input ]]; then
             filtered_fonts+=("$font")
         fi
     done
