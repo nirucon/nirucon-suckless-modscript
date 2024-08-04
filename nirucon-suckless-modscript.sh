@@ -21,10 +21,10 @@ cat << "EOF"
 ( V )
  \ / 
   V
-                                            
- I Love Suckless!
+                                             
+I Love Suckless!
 EOF
-
+echo "-------------------------------------------------------------------------------------"
 echo -e "${CYAN}Welcome to nirucon-suckless-modscript v0.1${NC}"
 echo "Minimal script with a few functions, might evolve in the future..."
 echo -e "Made by and for myself, ${GREEN}Nicklas Rudolfsson${NC} https://github.com/nirucon"
@@ -128,7 +128,7 @@ search_fonts() {
     [ -d /usr/local/share/fonts ] && font_dirs+=("/usr/local/share/fonts")
     [ -d ~/.local/share/fonts ] && font_dirs+=("$HOME/.local/share/fonts")
     
-    find "${font_dirs[@]}" -type f \( -name "*.ttf" -o -name "*.otf" \) -exec basename {} \; | sort -u
+    find "${font_dirs[@]}" -type f \( -name "*.ttf" -o -name "*.otf" \) -exec basename {} \; | sort -u | sed 's/.ttf\|.otf//g'
 }
 
 # Function to filter fonts based on user input
