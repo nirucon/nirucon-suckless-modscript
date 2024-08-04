@@ -123,12 +123,7 @@ change_font_size() {
 
 # Function to search for available fonts
 search_fonts() {
-    local font_dirs=()
-    [ -d /usr/share/fonts ] && font_dirs+=("/usr/share/fonts")
-    [ -d /usr/local/share/fonts ] && font_dirs+=("/usr/local/share/fonts")
-    [ -d ~/.local/share/fonts ] && font_dirs+=("$HOME/.local/share/fonts")
-    
-    find "${font_dirs[@]}" -type f \( -name "*.ttf" -o -name "*.otf" \) -exec basename {} \; | sort -u | sed 's/.ttf\|.otf//g'
+    fc-list : family | sort -u | sed 's/,.*$//'
 }
 
 # Function to filter fonts based on user input
@@ -176,7 +171,7 @@ change_font() {
         fi
     done
 
-    read -p "Input new font size (only numbers) and press enter to keep current size ($font_size): " new_font_size
+    read -p "Input new font size (only numbers) and press enter, or just press enter to keep current size ($font_size): " new_font_size
     new_font_size=${new_font_size:-$font_size}
     new_font_string="$new_font_name:size=$new_font_size:antialias=true:autohint=true"
 
