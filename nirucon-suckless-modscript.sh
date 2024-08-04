@@ -4,11 +4,22 @@
 # Minimal script with a few functions, might evolve in the future...
 # Made by and for myself, Nicklas Rudolfsson https://github.com/nirucon
 
-echo "Welcome to nirucon-suckless-modscript v0.1"
+# Define colors
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[0;33m'
+BLUE='\033[0;34m'
+CYAN='\033[0;36m'
+MAGENTA='\033[0;35m'
+NC='\033[0m' # No Color
+
+# ASCII logo placeholder
+
+echo -e "${CYAN}Welcome to nirucon-suckless-modscript v0.1${NC}"
 echo "Minimal script with a few functions, might evolve in the future..."
-echo "Made by and for myself, Nicklas Rudolfsson https://github.com/nirucon"
+echo -e "Made by and for myself, ${GREEN}Nicklas Rudolfsson${NC} https://github.com/nirucon"
 echo ""
-echo "Functional features:"
+echo -e "${YELLOW}Functional features:${NC}"
 echo "- Change font size in dwm, st, dmenu"
 echo "- Change font in dwm, st, dmenu"
 echo "- More might be added :)"
@@ -25,10 +36,10 @@ get_os_name() {
 }
 
 # Check and display system info
-echo "You are running: $(get_os_name)"
-echo "DWM: $(command -v dwm >/dev/null 2>&1 && echo "installed" || echo "not installed")"
-echo "ST: $(command -v st >/dev/null 2>&1 && echo "installed" || echo "not installed")"
-echo "DMENU: $(command -v dmenu >/dev/null 2>&1 && echo "installed" || echo "not installed")"
+echo -e "You are running: ${GREEN}$(get_os_name)${NC}"
+echo -e "DWM: $(command -v dwm >/dev/null 2>&1 && echo -e "${GREEN}installed${NC}" || echo -e "${RED}not installed${NC}")"
+echo -e "ST: $(command -v st >/dev/null 2>&1 && echo -e "${GREEN}installed${NC}" || echo -e "${RED}not installed${NC}")"
+echo -e "DMENU: $(command -v dmenu >/dev/null 2>&1 && echo -e "${GREEN}installed${NC}" || echo -e "${RED}not installed${NC}")"
 echo ""
 
 # Ask for path-to-suckless directory
@@ -39,7 +50,7 @@ while true; do
     if [ -d "$suckless_dir" ]; then
         break
     else
-        echo "Error: Directory does not exist. Please try again."
+        echo -e "${RED}Error: Directory does not exist. Please try again.${NC}"
     fi
 done
 
@@ -51,7 +62,7 @@ while true; do
     if [[ "$mod_choice" == "dwm" || "$mod_choice" == "st" || "$mod_choice" == "dmenu" ]]; then
         break
     else
-        echo "Error: Please choose DWM, ST, or DMENU."
+        echo -e "${RED}Error: Please choose DWM, ST, or DMENU.${NC}"
     fi
 done
 
@@ -60,16 +71,19 @@ get_font_info() {
     local config_file=$1
     case $mod_choice in
         dwm)
-            font_name=$(grep -Eo 'static const char \*fonts\[\] = \{ "[^:]+:size=[0-9]+' "$config_file" | sed -E 's/static const char \*fonts\[\] = \{ "([^:]+):size=[0-9]+/\1/')
-            font_size=$(echo "$font_name" | grep -Eo '[0-9]+$')
+            font_line=$(grep -E 'static const char \*fonts\[\] = \{ "[^:]+:size=[0-9]+' "$config_file")
+            font_name=$(echo "$font_line" | sed -E 's/static const char \*fonts\[\] = \{ "([^:]+):size=[0-9]+.*/\1/')
+            font_size=$(echo "$font_line" | grep -Eo 'size=[0-9]+' | grep -Eo '[0-9]+')
             ;;
         st)
-            font_name=$(grep -Eo 'static char \*font = "[^:]+:size=[0-9]+' "$config_file" | sed -E 's/static char \*font = "([^:]+):size=[0-9]+/\1/')
-            font_size=$(echo "$font_name" | grep -Eo '[0-9]+$')
+            font_line=$(grep -E 'static char \*font = "[^:]+:size=[0-9]+' "$config_file")
+            font_name=$(echo "$font_line" | sed -E 's/static char \*font = "([^:]+):size=[0-9]+.*/\1/')
+            font_size=$(echo "$font_line" | grep -Eo 'size=[0-9]+' | grep -Eo '[0-9]+')
             ;;
         dmenu)
-            font_name=$(grep -Eo 'static const char \*fonts\[\] = \{ "[^:]+:size=[0-9]+' "$config_file" | sed -E 's/static const char \*fonts\[\] = \{ "([^:]+):size=[0-9]+/\1/')
-            font_size=$(echo "$font_name" | grep -Eo '[0-9]+$')
+            font_line=$(grep -E 'static const char \*fonts\[\] = \{ "[^:]+:size=[0-9]+' "$config_file")
+            font_name=$(echo "$font_line" | sed -E 's/static const char \*fonts\[\] = \{ "([^:]+):size=[0-9]+.*/\1/')
+            font_size=$(echo "$font_line" | grep -Eo 'size=[0-9]+' | grep -Eo '[0-9]+')
             ;;
     esac
 }
@@ -77,28 +91,23 @@ get_font_info() {
 # Function to change font size in config.def.h
 change_font_size() {
     local config_file=$1
-    read -p "Do you want to change the fontsize? Y/n: " change_font
-    change_font=${change_font:-y}
-
-    if [[ "$change_font" =~ ^[Yy]$ ]]; then
-        read -p "Input new font size (only numbers) and press enter: " new_font_size
-        new_font_name=$(echo "$font_name" | sed "s/[0-9]\+/$new_font_size/")
-        case $mod_choice in
-            dwm)
-                sed -i "s|$font_name:size=[0-9]\+|$font_name:size=$new_font_size|" "$config_file"
-                ;;
-            st)
-                sed -i "s|$font_name:size=[0-9]\+|$font_name:size=$new_font_size|" "$config_file"
-                ;;
-            dmenu)
-                sed -i "s|$font_name:size=[0-9]\+|$font_name:size=$new_font_size|" "$config_file"
-                ;;
-        esac
-        cp "$config_file" "$(dirname "$config_file")/config.h"
-        echo "Running sudo make clean install in $(dirname "$config_file")"
-        sudo make -C "$(dirname "$config_file")" clean install
-        echo "Font size changed to $new_font_size. You may need to restart your $mod_choice."
-    fi
+    read -p "Input new font size (only numbers) and press enter: " new_font_size
+    new_font_name="$font_name:size=$new_font_size"
+    case $mod_choice in
+        dwm)
+            sed -i "s|$font_name:size=[0-9]\+|$new_font_name|" "$config_file"
+            ;;
+        st)
+            sed -i "s|$font_name:size=[0-9]\+|$new_font_name|" "$config_file"
+            ;;
+        dmenu)
+            sed -i "s|$font_name:size=[0-9]\+|$new_font_name|" "$config_file"
+            ;;
+    esac
+    cp "$config_file" "$(dirname "$config_file")/config.h"
+    echo -e "Running ${CYAN}sudo make clean install${NC} in $(dirname "$config_file")"
+    sudo make -C "$(dirname "$config_file")" clean install
+    echo -e "Font size changed to ${GREEN}$new_font_size${NC}. You may need to restart your $mod_choice."
 }
 
 # Function to search for available fonts
@@ -135,7 +144,7 @@ change_font() {
         filtered_fonts=($(filter_fonts "$font_input" "${available_fonts[@]}"))
 
         if [ ${#filtered_fonts[@]} -eq 0 ]; then
-            echo "No matching fonts found. Please try again."
+            echo -e "${RED}No matching fonts found. Please try again.${NC}"
         else
             break
         fi
@@ -152,7 +161,7 @@ change_font() {
             new_font_name="${filtered_fonts[$((font_choice - 1))]}"
             break
         else
-            echo "Invalid choice. Please try again."
+            echo -e "${RED}Invalid choice. Please try again.${NC}"
         fi
     done
 
@@ -173,9 +182,9 @@ change_font() {
     esac
 
     cp "$config_file" "$(dirname "$config_file")/config.h"
-    echo "Running sudo make clean install in $(dirname "$config_file")"
+    echo -e "Running ${CYAN}sudo make clean install${NC} in $(dirname "$config_file")"
     sudo make -C "$(dirname "$config_file")" clean install
-    echo "Font changed to $new_font_string. You may need to restart your $mod_choice."
+    echo -e "Font changed to ${GREEN}$new_font_string${NC}. You may need to restart your $mod_choice."
 }
 
 # Determine config.def.h path based on choice
@@ -192,7 +201,7 @@ case $mod_choice in
 esac
 
 if [ -z "$config_file" ]; then
-    echo "Error: Could not find config.def.h for $mod_choice in $suckless_dir"
+    echo -e "${RED}Error: Could not find config.def.h for $mod_choice in $suckless_dir${NC}"
     exit 1
 fi
 
@@ -200,10 +209,10 @@ fi
 get_font_info "$config_file"
 
 # Display current font info and prompt for changes
-echo "$mod_choice"
+echo -e "${CYAN}$mod_choice${NC}"
 echo "Font"
-echo "Current font is: ${font_name%:*}"
-echo "Current font size is: $font_size"
+echo -e "Current font is: ${GREEN}$font_name${NC}"
+echo -e "Current font size is: ${GREEN}$font_size${NC}"
 
 # Prompt user to change font or font size
 while true; do
@@ -217,7 +226,7 @@ while true; do
         change_font_size "$config_file"
         break
     else
-        echo "Error: Please choose 'font' or 'size'."
+        echo -e "${RED}Error: Please choose 'font' or 'size'.${NC}"
     fi
 done
 
@@ -228,7 +237,7 @@ while true; do
     if [[ "$run_again" =~ ^[Yy]$ ]]; then
         exec "$0"
     else
-        echo "Bye!"
+        echo -e "${CYAN}Bye!${NC}"
         exit 0
     fi
 done
