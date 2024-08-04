@@ -13,6 +13,8 @@ CYAN='\033[0;36m'
 MAGENTA='\033[0;35m'
 NC='\033[0m' # No Color
 
+clear
+
 # ASCII logo
 cat << "EOF"
  _ _ 
