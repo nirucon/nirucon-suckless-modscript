@@ -121,9 +121,9 @@ change_font_size() {
     echo -e "Font size changed to ${GREEN}$new_font_size${NC}. You may need to restart your $mod_choice."
 }
 
-# Function to search for available fonts
+# Function to search for available fonts using fc-list
 search_fonts() {
-    fc-list : family | sort -u | sed 's/,.*$//'
+    fc-list : family | sed 's/,.*//g' | sort -u
 }
 
 # Function to filter fonts based on user input
@@ -171,7 +171,7 @@ change_font() {
         fi
     done
 
-    read -p "Input new font size (only numbers) and press enter, or just press enter to keep current size ($font_size): " new_font_size
+    read -p "Input new font size (only numbers) and press enter to keep current size ($font_size): " new_font_size
     new_font_size=${new_font_size:-$font_size}
     new_font_string="$new_font_name:size=$new_font_size:antialias=true:autohint=true"
 
