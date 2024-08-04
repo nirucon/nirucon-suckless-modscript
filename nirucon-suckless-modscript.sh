@@ -4,7 +4,6 @@
 # Minimal script with a few functions, might evolve in the future...
 # Made by and for myself, Nicklas Rudolfsson https://github.com/nirucon
 
-clear
 echo "Welcome to nirucon-suckless-modscript v0.1"
 echo "Minimal script with a few functions, might evolve in the future..."
 echo "Made by and for myself, Nicklas Rudolfsson https://github.com/nirucon"
@@ -103,15 +102,20 @@ change_font_size() {
 # Determine config.def.h path based on choice
 case $mod_choice in
     dwm)
-        config_file=$(find "$suckless_dir" -name "config.def.h" -path "*/dwm/*")
+        config_file=$(find "$suckless_dir" -iname "config.def.h" -path "*/dwm*" | head -n 1)
         ;;
     st)
-        config_file=$(find "$suckless_dir" -name "config.def.h" -path "*/st/*")
+        config_file=$(find "$suckless_dir" -iname "config.def.h" -path "*/st*" | head -n 1)
         ;;
     dmenu)
-        config_file=$(find "$suckless_dir" -name "config.def.h" -path "*/dmenu/*")
+        config_file=$(find "$suckless_dir" -iname "config.def.h" -path "*/dmenu*" | head -n 1)
         ;;
 esac
+
+if [ -z "$config_file" ]; then
+    echo "Error: Could not find config.def.h for $mod_choice in $suckless_dir"
+    exit 1
+fi
 
 # Get current font info
 get_font_info "$config_file"
