@@ -15,11 +15,12 @@ NC='\033[0m' # No Color
 
 # ASCII logo
 cat << "EOF"
-  ____            _        _                     
- / ___| _ __ ___ | | _____| |__   ___  _ __  ___ 
- \___ \| '_ ` _ \| |/ / __| '_ \ / _ \| '_ \/ __|
-  ___) | | | | | |   <\__ \ | | | (_) | | | \__ \
- |____/|_| |_| |_|_|\_\___/_| |_|\___/|_| |_|___/
+ _ _ 
+( V )
+ \ / 
+  V
+                                            
+ I Love Suckless!
 EOF
 
 echo -e "${CYAN}Welcome to nirucon-suckless-modscript v0.1${NC}"
