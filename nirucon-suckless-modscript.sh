@@ -13,7 +13,14 @@ CYAN='\033[0;36m'
 MAGENTA='\033[0;35m'
 NC='\033[0m' # No Color
 
-# ASCII logo placeholder
+# ASCII logo
+cat << "EOF"
+  ____            _        _                     
+ / ___| _ __ ___ | | _____| |__   ___  _ __  ___ 
+ \___ \| '_ ` _ \| |/ / __| '_ \ / _ \| '_ \/ __|
+  ___) | | | | | |   <\__ \ | | | (_) | | | \__ \
+ |____/|_| |_| |_|_|\_\___/_| |_|\___/|_| |_|___/
+EOF
 
 echo -e "${CYAN}Welcome to nirucon-suckless-modscript v0.1${NC}"
 echo "Minimal script with a few functions, might evolve in the future..."
@@ -71,19 +78,19 @@ get_font_info() {
     local config_file=$1
     case $mod_choice in
         dwm)
-            font_line=$(grep -E 'static const char \*fonts\[\] = \{ "[^:]+:size=[0-9]+' "$config_file")
+            font_line=$(grep -E 'static const char \*fonts\[\] = \{ "[^"]+' "$config_file")
             font_name=$(echo "$font_line" | sed -E 's/static const char \*fonts\[\] = \{ "([^:]+):size=[0-9]+.*/\1/')
-            font_size=$(echo "$font_line" | grep -Eo 'size=[0-9]+' | grep -Eo '[0-9]+')
+            font_size=$(echo "$font_line" | grep -o 'size=[0-9]\+' | grep -o '[0-9]\+')
             ;;
         st)
-            font_line=$(grep -E 'static char \*font = "[^:]+:size=[0-9]+' "$config_file")
+            font_line=$(grep -E 'static char \*font = "[^"]+' "$config_file")
             font_name=$(echo "$font_line" | sed -E 's/static char \*font = "([^:]+):size=[0-9]+.*/\1/')
-            font_size=$(echo "$font_line" | grep -Eo 'size=[0-9]+' | grep -Eo '[0-9]+')
+            font_size=$(echo "$font_line" | grep -o 'size=[0-9]\+' | grep -o '[0-9]\+')
             ;;
         dmenu)
-            font_line=$(grep -E 'static const char \*fonts\[\] = \{ "[^:]+:size=[0-9]+' "$config_file")
+            font_line=$(grep -E 'static const char \*fonts\[\] = \{ "[^"]+' "$config_file")
             font_name=$(echo "$font_line" | sed -E 's/static const char \*fonts\[\] = \{ "([^:]+):size=[0-9]+.*/\1/')
-            font_size=$(echo "$font_line" | grep -Eo 'size=[0-9]+' | grep -Eo '[0-9]+')
+            font_size=$(echo "$font_line" | grep -o 'size=[0-9]\+' | grep -o '[0-9]\+')
             ;;
     esac
 }
@@ -91,7 +98,8 @@ get_font_info() {
 # Function to change font size in config.def.h
 change_font_size() {
     local config_file=$1
-    read -p "Input new font size (only numbers) and press enter: " new_font_size
+    read -p "Input new font size (only numbers) and press enter to keep current size ($font_size): " new_font_size
+    new_font_size=${new_font_size:-$font_size}
     new_font_name="$font_name:size=$new_font_size"
     case $mod_choice in
         dwm)
@@ -165,7 +173,8 @@ change_font() {
         fi
     done
 
-    read -p "Input new font size (only numbers) and press enter: " new_font_size
+    read -p "Input new font size (only numbers) and press enter to keep current size ($font_size): " new_font_size
+    new_font_size=${new_font_size:-$font_size}
     new_font_string="$new_font_name:size=$new_font_size:antialias=true:autohint=true"
 
     case $mod_choice in
