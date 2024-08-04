@@ -25,7 +25,7 @@ Minimal script with a few functions for modifying Suckless software configuratio
    - Follow the prompts to input the new font or size.
 
 4. **Rebuild the configuration**:
-   - The script will update the `config.def.h` / `config..h` files and run `make clean install` to apply changes.
+   - The script will update the `config.def.h` / `config.h` files and run `make clean install` to apply changes.
    - You need to restart the modified software for changes to take effect.
 
 5. **Repeat or exit**:
