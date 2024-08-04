@@ -1,1 +1,3 @@
 # nirucon-suckless-modscript
+
+work in progress... better readme will come...
