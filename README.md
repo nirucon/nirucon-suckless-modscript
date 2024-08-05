@@ -4,8 +4,8 @@ Minimal script with a few functions for modifying Suckless software configuratio
 
 ## Features
 
-- Change font size in DWM, ST, DMENU
 - Change font in DWM, ST, DMENU
+- Change font size in DWM, ST, DMENU
 
 ## Usage
 
